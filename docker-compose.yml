@@ -1,0 +1,41 @@
+version: '3.4'
+
+services:
+  base:
+    container_name: base
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: base:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./settings/core.env
+      - ./settings/db-default.env
+    depends_on:
+      - base-db
+    networks:
+      - base
+    volumes:
+      - django_data:/app
+
+  base-db:
+    container_name: base-db
+    image: postgres:14.0-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./settings/db-default.env
+    networks:
+      - base
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/ #  Precisa ser definido para resolver erro do psycopg2: pg_config executable not found.
+
+networks:
+  base:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  django_data:
